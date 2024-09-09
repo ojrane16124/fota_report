@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FOTA Download Report</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Fota Download Report</h2>
+
+<table id="jsonTable">
+    <thead>
+        <tr>
+            <th>Model</th>
+            <th>VIN</th>
+            <th>FOTA Path</th>
+            <th>FOTA Version</th>
+            <th>TLA</th>
+            <th>Controller</th>
+            <th>Chunk Size</th>
+            <th>Total Chunks</th>
+            <th>Offset</th>
+            <th>Downloaded</th>
+            <th>Percentage</th>
+            <th>Download Completed</th>
+            <th>Installation & Verification</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- Table rows will be inserted here -->
+    </tbody>
+</table>
+
+<script>
+    fetch('final.json')
+        .then(response => response.json())
+        .then(data => {
+            const table = document.getElementById('jsonTable').getElementsByTagName('tbody')[0];
+            
+            data.forEach(item => {
+                const row = table.insertRow();
+
+                row.insertCell(0).textContent = item.model || '';
+                row.insertCell(1).textContent = item.vin || '';
+                row.insertCell(2).textContent = item['fota-path'] || '';
+                row.insertCell(3).textContent = item['fota-version'] || '';
+                row.insertCell(4).textContent = item.tla || '';
+                row.insertCell(5).textContent = item.controller || '';
+                row.insertCell(6).textContent = item['chunk-size'] || '';
+                row.insertCell(7).textContent = item['total-chunks'] || '';
+                row.insertCell(8).textContent = item.offset || '';
+                row.insertCell(9).textContent = item.downloaded || '';
+                row.insertCell(10).textContent = item.percentage || '';
+                row.insertCell(11).textContent = item['download-completed'] || '';
+                row.insertCell(12).textContent = item['installation & verification'] || '';
+            });
+        })
+        .catch(error => console.error('Error loading the JSON data:', error));
+</script>
+
+</body>
+</html>
