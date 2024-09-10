@@ -1,49 +1,5 @@
 [
-    {
-        "model": "H105A",
-        "vin": "123EV00041",
-        "fota-path": "s3://test-fota-info-bucket/H105A/AL404512001027.hex",
-        "fota-version": "H105A.0.2.3",
-        "tla": "VCU",
-        "controller": "RH850-F1KM-S1-100-0512",
-        "chunk-size": "4096",
-        "total-chunks": "158",
-        "offset": 2,
-        "downloaded": 1,
-        "percentage": 0.63,
-        "download-completed": "NO",
-        "installation & verification": "NO"
-    },
-    {
-        "model": "H105A",
-        "vin": "123EV00042",
-        "fota-path": "s3://test-fota-info-bucket/H105A/AL404512001027.hex",
-        "fota-version": "H105A.0.2.3",
-        "tla": "VCU",
-        "controller": "RH850-F1KM-S1-100-0512",
-        "chunk-size": "4096",
-        "total-chunks": "158",
-        "offset": 2,
-        "downloaded": 1,
-        "percentage": 0.63,
-        "download-completed": "NO",
-        "installation & verification": "NO"
-    },
-    {
-        "model": "H105A",
-        "vin": "123EV00043",
-        "fota-path": "s3://test-fota-info-bucket/H105A/AL404512001027.hex",
-        "fota-version": "H105A.0.2.3",
-        "tla": "VCU",
-        "controller": "RH850-F1KM-S1-100-0512",
-        "chunk-size": "4096",
-        "total-chunks": "158",
-        "offset": 2,
-        "downloaded": 1,
-        "percentage": 0.63,
-        "download-completed": "NO",
-        "installation & verification": "NO"
-    },
+    
     {
         "model": "H105A",
         "vin": "123EV00044",
