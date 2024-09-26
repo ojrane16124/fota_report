@@ -215,10 +215,11 @@
         });
     }
 
-    // Function to draw "Percentage Distribution" pie chart
+    // Function to draw "Percentage Distribution" pie chart with actual percentage of each group
     function drawPercentageDistributionChart() {
         const percentageCounts = {};
 
+        // Collect counts for each percentage value
         data.forEach(item => {
             const percentage = Math.round(parseFloat(item.percentage));
             if (!isNaN(percentage)) {
@@ -230,11 +231,18 @@
             }
         });
 
+        const totalCounts = Object.values(percentageCounts).reduce((a, b) => a + b, 0); // Total number of entries
+        const percentageLabels = Object.keys(percentageCounts).map(percentage => {
+            const count = percentageCounts[percentage];
+            const actualPercentage = ((count / totalCounts) * 100).toFixed(2); // Calculate actual percentage
+            return `${percentage}% (${actualPercentage}%)`; // Show both download percentage and actual percentage
+        });
+
         const ctx = document.getElementById('percentageDistributionChart').getContext('2d');
         new Chart(ctx, {
             type: 'pie',
             data: {
-                labels: Object.keys(percentageCounts),
+                labels: percentageLabels, // Use new labels with actual percentages
                 datasets: [{
                     data: Object.values(percentageCounts),
                     backgroundColor: Object.keys(percentageCounts).map(() => `hsl(${Math.random() * 360}, 70%, 50%)`), // Random colors
