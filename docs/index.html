@@ -24,11 +24,12 @@
             justify-content: flex-start;
             align-items: center;
             padding-top: 20px;
+            position: relative;
         }
 
         /* Collapsed sidebar */
         .sidebar.collapsed {
-            width: 60px; /* Collapsed width */
+            width: 0; /* Fully hidden when collapsed */
         }
 
         /* Sidebar toggle button */
@@ -42,6 +43,7 @@
             cursor: pointer;
             border: none;
             font-size: 20px;
+            z-index: 1000;
         }
 
         /* Links inside the sidebar */
@@ -54,7 +56,12 @@
             display: block;
             margin-bottom: 10px;
             white-space: nowrap; /* Prevent text wrapping */
-            transition: all 0.3s ease;
+            transition: opacity 0.3s ease;
+        }
+
+        /* Hide text in collapsed sidebar */
+        .sidebar.collapsed a {
+            opacity: 0; /* Hide links when collapsed */
         }
 
         /* Hover effect */
@@ -68,12 +75,12 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            transition: margin-left 0.3s;
+            transition: margin-left 0.3s ease;
         }
 
         /* Adjust main content when sidebar is collapsed */
         .main-content.collapsed {
-            margin-left: 60px;
+            margin-left: 0; /* Shift content back when sidebar is hidden */
         }
 
         /* Iframe for the content */
@@ -83,12 +90,17 @@
             border: none;
         }
 
+        /* Sidebar toggle button styling when sidebar is collapsed */
+        .sidebar-toggle.collapsed {
+            left: 10px; /* Move it to the edge of the screen */
+        }
+
     </style>
 </head>
 <body>
 
     <!-- Sidebar toggle button -->
-    <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+    <button class="sidebar-toggle" id="toggleButton" onclick="toggleSidebar()">☰</button>
 
     <!-- Sidebar -->
     <div class="sidebar" id="sidebar">
@@ -112,8 +124,19 @@
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const mainContent = document.getElementById('mainContent');
+            const toggleButton = document.getElementById('toggleButton');
+
+            // Toggle the collapsed class for sidebar and main content
             sidebar.classList.toggle('collapsed');
             mainContent.classList.toggle('collapsed');
+            toggleButton.classList.toggle('collapsed');
+
+            // Update the button text based on sidebar state
+            if (sidebar.classList.contains('collapsed')) {
+                toggleButton.innerHTML = '☰'; // Show hamburger icon
+            } else {
+                toggleButton.innerHTML = '☰'; // Optional: You can change the icon
+            }
         }
     </script>
 
