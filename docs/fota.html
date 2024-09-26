@@ -34,6 +34,34 @@
             width: 75% !important;
             height: auto !important;
         }
+
+        /* Flexbox for buttons */
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        /* Styling for buttons */
+        .button-container button {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .button-container button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Center the page info */
+        #pageInfo {
+            margin: 0 20px;
+            font-weight: bold;
+        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.2/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -77,15 +105,13 @@
     </div>
 </div>
 
-<!-- Pagination controls -->
-<div>
+<!-- Pagination and Save to Excel Button in a container -->
+<div class="button-container">
     <button id="prevPage">Previous</button>
     <span id="pageInfo"></span>
     <button id="nextPage">Next</button>
+    <button id="saveToExcel">Save to Excel</button>
 </div>
-
-<!-- Button to save the table to Excel -->
-<button id="saveToExcel">Save to Excel</button>
 
 <script>
     let data = [];
@@ -182,81 +208,6 @@
         XLSX.utils.book_append_sheet(wb, ws, 'FOTA Report');
         XLSX.writeFile(wb, 'FOTA_Download_Report.xlsx');
     });
-
-    // Function to draw "Download Completed" pie chart
-    function drawDownloadCompletedChart() {
-        const completedCount = data.reduce((acc, item) => {
-            if (item['download-completed'] && item['download-completed'].toLowerCase() === 'yes') {
-                acc.yes++;
-            } else {
-                acc.no++;
-            }
-            return acc;
-        }, { yes: 0, no: 0 });
-
-        const ctx = document.getElementById('downloadCompletedChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'pie',
-            data: {
-                labels: ['Download Completed', 'Download Not Completed'],
-                datasets: [{
-                    data: [completedCount.yes, completedCount.no],
-                    backgroundColor: ['#4CAF50', '#FF5252'],
-                    hoverBackgroundColor: ['#66BB6A', '#FF7043']
-                }]
-            },
-            options: {
-                responsive: true,
-                title: {
-                    display: true,
-                    text: 'Download Completed Status'
-                }
-            }
-        });
-    }
-
-    // Function to draw "Percentage Distribution" pie chart with actual percentage of each group
-    function drawPercentageDistributionChart() {
-        const percentageCounts = {};
-
-        // Collect counts for each percentage value
-        data.forEach(item => {
-            const percentage = Math.round(parseFloat(item.percentage));
-            if (!isNaN(percentage)) {
-                if (percentageCounts[percentage]) {
-                    percentageCounts[percentage]++;
-                } else {
-                    percentageCounts[percentage] = 1;
-                }
-            }
-        });
-
-        const totalCounts = Object.values(percentageCounts).reduce((a, b) => a + b, 0); // Total number of entries
-        const percentageLabels = Object.keys(percentageCounts).map(percentage => {
-            const count = percentageCounts[percentage];
-            const actualPercentage = ((count / totalCounts) * 100).toFixed(2); // Calculate actual percentage
-            return `${percentage}% (${actualPercentage}%)`; // Show both download percentage and actual percentage
-        });
-
-        const ctx = document.getElementById('percentageDistributionChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'pie',
-            data: {
-                labels: percentageLabels, // Use new labels with actual percentages
-                datasets: [{
-                    data: Object.values(percentageCounts),
-                    backgroundColor: Object.keys(percentageCounts).map(() => `hsl(${Math.random() * 360}, 70%, 50%)`), // Random colors
-                }]
-            },
-            options: {
-                responsive: true,
-                title: {
-                    display: true,
-                    text: 'Download Percentage Distribution'
-                }
-            }
-        });
-    }
 </script>
 
 </body>
