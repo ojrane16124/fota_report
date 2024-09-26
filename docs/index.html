@@ -23,7 +23,7 @@
 </head>
 <body>
 
-<h2>Fota Download Report</h2>
+<h2>FOTA Download Report</h2>
 
 <table id="jsonTable">
     <thead>
@@ -48,31 +48,75 @@
     </tbody>
 </table>
 
+<!-- Pagination controls -->
+<div>
+    <button id="prevPage">Previous</button>
+    <span id="pageInfo"></span>
+    <button id="nextPage">Next</button>
+</div>
+
 <script>
+    let data = [];
+    const rowsPerPage = 100; // Set the number of rows per page
+    let currentPage = 1;
+
     fetch('final.json')
         .then(response => response.json())
-        .then(data => {
-            const table = document.getElementById('jsonTable').getElementsByTagName('tbody')[0];
-            
-            data.forEach(item => {
-                const row = table.insertRow();
-
-                row.insertCell(0).textContent = item.model || '';
-                row.insertCell(1).textContent = item.vin || '';
-                row.insertCell(2).textContent = item['fota-path'] || '';
-                row.insertCell(3).textContent = item['fota-version'] || '';
-                row.insertCell(4).textContent = item.tla || '';
-                row.insertCell(5).textContent = item.controller || '';
-                row.insertCell(6).textContent = item['chunk-size'] || '';
-                row.insertCell(7).textContent = item['total-chunks'] || '';
-                row.insertCell(8).textContent = item.offset || '';
-                row.insertCell(9).textContent = item.downloaded || '';
-                row.insertCell(10).textContent = item.percentage || '';
-                row.insertCell(11).textContent = item['download-completed'] || '';
-                row.insertCell(12).textContent = item['installation & verification'] || '';
-            });
+        .then(jsonData => {
+            data = jsonData;
+            renderTable(currentPage);
+            updatePageInfo();
         })
         .catch(error => console.error('Error loading the JSON data:', error));
+
+    function renderTable(page) {
+        const table = document.getElementById('jsonTable').getElementsByTagName('tbody')[0];
+        table.innerHTML = ''; // Clear the table
+
+        const start = (page - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
+
+        const pageData = data.slice(start, end); // Get the data for the current page
+        pageData.forEach(item => {
+            const row = table.insertRow();
+
+            row.insertCell(0).textContent = item.model || '';
+            row.insertCell(1).textContent = item.vin || '';
+            row.insertCell(2).textContent = item['fota-path'] || '';
+            row.insertCell(3).textContent = item['fota-version'] || '';
+            row.insertCell(4).textContent = item.tla || '';
+            row.insertCell(5).textContent = item.controller || '';
+            row.insertCell(6).textContent = item['chunk-size'] || '';
+            row.insertCell(7).textContent = item['total-chunks'] || '';
+            row.insertCell(8).textContent = item.offset || '';
+            row.insertCell(9).textContent = item.downloaded || '';
+            row.insertCell(10).textContent = item.percentage || '';
+            row.insertCell(11).textContent = item['download-completed'] || '';
+            row.insertCell(12).textContent = item['installation & verification'] || '';
+        });
+    }
+
+    function updatePageInfo() {
+        const pageInfo = document.getElementById('pageInfo');
+        const totalPages = Math.ceil(data.length / rowsPerPage);
+        pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+    }
+
+    document.getElementById('nextPage').addEventListener('click', () => {
+        if (currentPage * rowsPerPage < data.length) {
+            currentPage++;
+            renderTable(currentPage);
+            updatePageInfo();
+        }
+    });
+
+    document.getElementById('prevPage').addEventListener('click', () => {
+        if (currentPage > 1) {
+            currentPage--;
+            renderTable(currentPage);
+            updatePageInfo();
+        }
+    });
 </script>
 
 </body>
