@@ -27,11 +27,11 @@
             margin-top: 20px;
         }
         .chart-box {
-            width: 35%; /* Each chart will take up 45% of the container's width */
+            width: 45%; /* Each chart will take up 45% of the container's width */
         }
 
         canvas {
-            width: 90% !important;
+            width: 75% !important;
             height: auto !important;
         }
     </style>
@@ -68,12 +68,12 @@
 <!-- Chart container with two charts side by side -->
 <div class="chart-container">
     <div class="chart-box">
-        <h3>Download Status</h3>
-        <canvas id="downloadedChart"></canvas>
+        <h3>Download Completed</h3>
+        <canvas id="downloadCompletedChart"></canvas>
     </div>
     <div class="chart-box">
         <h3>Percentage Distribution</h3>
-        <canvas id="percentageChart"></canvas>
+        <canvas id="percentageDistributionChart"></canvas>
     </div>
 </div>
 
@@ -98,8 +98,8 @@
             data = jsonData;
             renderTable(currentPage);
             updatePageInfo();
-            drawDownloadedChart();
-            drawPercentageChart();
+            drawDownloadCompletedChart();
+            drawPercentageDistributionChart();
         })
         .catch(error => console.error('Error loading the JSON data:', error));
 
@@ -183,10 +183,10 @@
         XLSX.writeFile(wb, 'FOTA_Download_Report.xlsx');
     });
 
-    // Function to draw "Downloaded" pie chart
-    function drawDownloadedChart() {
-        const downloadedCount = data.reduce((acc, item) => {
-            if (item['download-completed'] === 'Yes') {
+    // Function to draw "Download Completed" pie chart
+    function drawDownloadCompletedChart() {
+        const completedCount = data.reduce((acc, item) => {
+            if (item['download-completed'] && item['download-completed'].toLowerCase() === 'yes') {
                 acc.yes++;
             } else {
                 acc.no++;
@@ -194,13 +194,13 @@
             return acc;
         }, { yes: 0, no: 0 });
 
-        const ctx = document.getElementById('downloadedChart').getContext('2d');
+        const ctx = document.getElementById('downloadCompletedChart').getContext('2d');
         new Chart(ctx, {
             type: 'pie',
             data: {
-                labels: ['Downloaded', 'Not Downloaded'],
+                labels: ['Download Completed', 'Download Not Completed'],
                 datasets: [{
-                    data: [downloadedCount.yes, downloadedCount.no],
+                    data: [completedCount.yes, completedCount.no],
                     backgroundColor: ['#4CAF50', '#FF5252'],
                     hoverBackgroundColor: ['#66BB6A', '#FF7043']
                 }]
@@ -209,38 +209,35 @@
                 responsive: true,
                 title: {
                     display: true,
-                    text: 'Download Status Distribution'
+                    text: 'Download Completed Status'
                 }
             }
         });
     }
 
-    // Function to draw "Percentage" pie chart
-    function drawPercentageChart() {
-        const percentageBins = { '0-25%': 0, '25-50%': 0, '50-75%': 0, '75-100%': 0 };
-        
+    // Function to draw "Percentage Distribution" pie chart
+    function drawPercentageDistributionChart() {
+        const percentageCounts = {};
+
         data.forEach(item => {
-            const percentage = parseFloat(item.percentage);
-            if (percentage <= 25) {
-                percentageBins['0-25%']++;
-            } else if (percentage <= 50) {
-                percentageBins['25-50%']++;
-            } else if (percentage <= 75) {
-                percentageBins['50-75%']++;
-            } else {
-                percentageBins['75-100%']++;
+            const percentage = Math.round(parseFloat(item.percentage));
+            if (!isNaN(percentage)) {
+                if (percentageCounts[percentage]) {
+                    percentageCounts[percentage]++;
+                } else {
+                    percentageCounts[percentage] = 1;
+                }
             }
         });
 
-        const ctx = document.getElementById('percentageChart').getContext('2d');
+        const ctx = document.getElementById('percentageDistributionChart').getContext('2d');
         new Chart(ctx, {
             type: 'pie',
             data: {
-                labels: Object.keys(percentageBins),
+                labels: Object.keys(percentageCounts),
                 datasets: [{
-                    data: Object.values(percentageBins),
-                    backgroundColor: ['#42A5F5', '#66BB6A', '#FFA726', '#FF5252'],
-                    hoverBackgroundColor: ['#64B5F6', '#81C784', '#FFB74D', '#FF7043']
+                    data: Object.values(percentageCounts),
+                    backgroundColor: Object.keys(percentageCounts).map(() => `hsl(${Math.random() * 360}, 70%, 50%)`), // Random colors
                 }]
             },
             options: {
