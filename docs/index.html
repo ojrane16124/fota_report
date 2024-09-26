@@ -19,8 +19,24 @@
         th {
             background-color: #f2f2f2;
         }
+
+        /* Flexbox layout for charts */
+        .chart-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .chart-box {
+            width: 35%; /* Each chart will take up 45% of the container's width */
+        }
+
+        canvas {
+            width: 90% !important;
+            height: auto !important;
+        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.2/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
@@ -49,6 +65,18 @@
     </tbody>
 </table>
 
+<!-- Chart container with two charts side by side -->
+<div class="chart-container">
+    <div class="chart-box">
+        <h3>Download Status</h3>
+        <canvas id="downloadedChart"></canvas>
+    </div>
+    <div class="chart-box">
+        <h3>Percentage Distribution</h3>
+        <canvas id="percentageChart"></canvas>
+    </div>
+</div>
+
 <!-- Pagination controls -->
 <div>
     <button id="prevPage">Previous</button>
@@ -70,6 +98,8 @@
             data = jsonData;
             renderTable(currentPage);
             updatePageInfo();
+            drawDownloadedChart();
+            drawPercentageChart();
         })
         .catch(error => console.error('Error loading the JSON data:', error));
 
@@ -122,44 +152,106 @@
         }
     });
 
-    // Save table data to Excel
+    // Function to save the entire data to an Excel file
     document.getElementById('saveToExcel').addEventListener('click', () => {
-    // Create a worksheet from the full data
-    const ws_data = [];
-    const headers = Array.from(document.getElementById('jsonTable').getElementsByTagName('th')).map(th => th.textContent);
-    ws_data.push(headers); // Add headers
+        const ws_data = [];
+        const headers = Array.from(document.getElementById('jsonTable').getElementsByTagName('th')).map(th => th.textContent);
+        ws_data.push(headers); // Add headers
 
-    // Add all records (not just the current page)
-    data.forEach(item => {
-        const rowData = [
-            item.model || '',
-            item.vin || '',
-            item['fota-path'] || '',
-            item['fota-version'] || '',
-            item.tla || '',
-            item.controller || '',
-            item['chunk-size'] || '',
-            item['total-chunks'] || '',
-            item.offset || '',
-            item.downloaded || '',
-            item.percentage || '',
-            item['download-completed'] || '',
-            item['installation & verification'] || ''
-        ];
-        ws_data.push(rowData);
+        data.forEach(item => {
+            const rowData = [
+                item.model || '',
+                item.vin || '',
+                item['fota-path'] || '',
+                item['fota-version'] || '',
+                item.tla || '',
+                item.controller || '',
+                item['chunk-size'] || '',
+                item['total-chunks'] || '',
+                item.offset || '',
+                item.downloaded || '',
+                item.percentage || '',
+                item['download-completed'] || '',
+                item['installation & verification'] || ''
+            ];
+            ws_data.push(rowData);
+        });
+
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.aoa_to_sheet(ws_data);
+        XLSX.utils.book_append_sheet(wb, ws, 'FOTA Report');
+        XLSX.writeFile(wb, 'FOTA_Download_Report.xlsx');
     });
 
-    // Create the workbook and worksheet
-    const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.aoa_to_sheet(ws_data);
+    // Function to draw "Downloaded" pie chart
+    function drawDownloadedChart() {
+        const downloadedCount = data.reduce((acc, item) => {
+            if (item['download-completed'] === 'Yes') {
+                acc.yes++;
+            } else {
+                acc.no++;
+            }
+            return acc;
+        }, { yes: 0, no: 0 });
 
-    // Append the worksheet to the workbook
-    XLSX.utils.book_append_sheet(wb, ws, 'FOTA Report');
+        const ctx = document.getElementById('downloadedChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['Downloaded', 'Not Downloaded'],
+                datasets: [{
+                    data: [downloadedCount.yes, downloadedCount.no],
+                    backgroundColor: ['#4CAF50', '#FF5252'],
+                    hoverBackgroundColor: ['#66BB6A', '#FF7043']
+                }]
+            },
+            options: {
+                responsive: true,
+                title: {
+                    display: true,
+                    text: 'Download Status Distribution'
+                }
+            }
+        });
+    }
 
-    // Save the workbook as an Excel file
-    XLSX.writeFile(wb, 'FOTA_Download_Report.xlsx');
-});
+    // Function to draw "Percentage" pie chart
+    function drawPercentageChart() {
+        const percentageBins = { '0-25%': 0, '25-50%': 0, '50-75%': 0, '75-100%': 0 };
+        
+        data.forEach(item => {
+            const percentage = parseFloat(item.percentage);
+            if (percentage <= 25) {
+                percentageBins['0-25%']++;
+            } else if (percentage <= 50) {
+                percentageBins['25-50%']++;
+            } else if (percentage <= 75) {
+                percentageBins['50-75%']++;
+            } else {
+                percentageBins['75-100%']++;
+            }
+        });
 
+        const ctx = document.getElementById('percentageChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: Object.keys(percentageBins),
+                datasets: [{
+                    data: Object.values(percentageBins),
+                    backgroundColor: ['#42A5F5', '#66BB6A', '#FFA726', '#FF5252'],
+                    hoverBackgroundColor: ['#64B5F6', '#81C784', '#FFB74D', '#FF7043']
+                }]
+            },
+            options: {
+                responsive: true,
+                title: {
+                    display: true,
+                    text: 'Download Percentage Distribution'
+                }
+            }
+        });
+    }
 </script>
 
 </body>
