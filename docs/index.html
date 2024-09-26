@@ -95,6 +95,21 @@
             left: 10px; /* Move it to the edge of the screen */
         }
 
+         /* Logo container at the bottom */
+         .logo-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            margin-top: auto; /* Push to the bottom */
+        }
+
+        .logo-container img {
+            width: 50px;  /* Adjust size of the logos */
+            height: 50px;
+            margin-bottom: 10px;
+        }
+
     </style>
 </head>
 <body>
@@ -107,6 +122,14 @@
         <a href="javascript:void(0)" onclick="loadPage('fota.html')">FOTA REPORT</a>
         <a href="javascript:void(0)" onclick="loadPage('analytics.html')">ANALYTICS</a>
         <!-- Add more links for different pages here -->
+
+        <!-- Logo container -->
+        <div class="logo-container">
+            <!-- Add your logo images here -->
+            <img src="bajaj.png" alt="Logo 1">
+            <img src="chetak.png" alt="Logo 2">
+            <!-- Add more logos if needed -->
+        </div>
     </div>
 
     <!-- Main content -->
