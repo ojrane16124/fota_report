@@ -8,9 +8,9 @@
         "controller": "RH850-F1KM-S1-100-0512",
         "chunk-size": "4096",
         "total-chunks": "158",
-        "offset": 5,
-        "downloaded": 4,
-        "percentage": 2.53,
+        "offset": 4097,
+        "downloaded": 4096,
+        "percentage": 2592.41,
         "download-completed": "NO",
         "installation & verification": "NO"
     },
