@@ -20,6 +20,7 @@
             background-color: #f2f2f2;
         }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.2/xlsx.full.min.js"></script>
 </head>
 <body>
 
@@ -54,6 +55,9 @@
     <span id="pageInfo"></span>
     <button id="nextPage">Next</button>
 </div>
+
+<!-- Button to save the table to Excel -->
+<button id="saveToExcel">Save to Excel</button>
 
 <script>
     let data = [];
@@ -117,6 +121,45 @@
             updatePageInfo();
         }
     });
+
+    // Save table data to Excel
+    document.getElementById('saveToExcel').addEventListener('click', () => {
+    // Create a worksheet from the full data
+    const ws_data = [];
+    const headers = Array.from(document.getElementById('jsonTable').getElementsByTagName('th')).map(th => th.textContent);
+    ws_data.push(headers); // Add headers
+
+    // Add all records (not just the current page)
+    data.forEach(item => {
+        const rowData = [
+            item.model || '',
+            item.vin || '',
+            item['fota-path'] || '',
+            item['fota-version'] || '',
+            item.tla || '',
+            item.controller || '',
+            item['chunk-size'] || '',
+            item['total-chunks'] || '',
+            item.offset || '',
+            item.downloaded || '',
+            item.percentage || '',
+            item['download-completed'] || '',
+            item['installation & verification'] || ''
+        ];
+        ws_data.push(rowData);
+    });
+
+    // Create the workbook and worksheet
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(ws_data);
+
+    // Append the worksheet to the workbook
+    XLSX.utils.book_append_sheet(wb, ws, 'FOTA Report');
+
+    // Save the workbook as an Excel file
+    XLSX.writeFile(wb, 'FOTA_Download_Report.xlsx');
+});
+
 </script>
 
 </body>
