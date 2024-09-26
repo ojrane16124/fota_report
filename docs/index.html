@@ -29,7 +29,7 @@
 
         /* Collapsed sidebar */
         .sidebar.collapsed {
-            width: 0; /* Fully hidden when collapsed */
+            width: 60px; /* Reduced width when collapsed */
         }
 
         /* Sidebar toggle button */
@@ -80,7 +80,7 @@
 
         /* Adjust main content when sidebar is collapsed */
         .main-content.collapsed {
-            margin-left: 0; /* Shift content back when sidebar is hidden */
+            margin-left: 60px; /* Shift content back when sidebar is hidden */
         }
 
         /* Iframe for the content */
@@ -95,19 +95,34 @@
             left: 10px; /* Move it to the edge of the screen */
         }
 
-         /* Logo container at the bottom */
-         .logo-container {
+        /* Logo container at the bottom */
+        .logo-container {
             display: flex;
             flex-direction: column;
             align-items: center;
             padding: 20px;
             margin-top: auto; /* Push to the bottom */
+            transition: opacity 0.3s ease, transform 0.3s ease;
         }
 
+        /* Logos inside the logo container */
         .logo-container img {
             width: 50px;  /* Adjust size of the logos */
             height: 50px;
             margin-bottom: 10px;
+            transition: transform 0.3s ease; /* Smooth scaling */
+        }
+
+        /* Hide logos in collapsed sidebar */
+        .sidebar.collapsed .logo-container {
+            opacity: 0; /* Fade out logos */
+            transform: scale(0); /* Scale down logos */
+        }
+
+        /* Logo visibility when the sidebar is expanded */
+        .sidebar .logo-container {
+            opacity: 1;
+            transform: scale(1);
         }
 
     </style>
@@ -127,7 +142,7 @@
         <div class="logo-container">
             <!-- Add your logo images here -->
             <img src="bajaj.png" alt="Logo 1">
-            <img src="chetak.png" alt="Logo 2">
+            <img src="chetak.jpg" alt="Logo 2">
             <!-- Add more logos if needed -->
         </div>
     </div>
