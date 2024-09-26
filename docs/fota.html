@@ -20,6 +20,28 @@
             background-color: #f2f2f2;
         }
 
+        /* Flexbox for buttons */
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        /* Styling for buttons */
+        .button-container button {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .button-container button:hover {
+            background-color: #0056b3;
+        }
+
         /* Flexbox layout for charts */
         .chart-container {
             display: flex;
@@ -30,12 +52,12 @@
             width: 45%; /* Each chart will take up 45% of the container's width */
         }
 
-        /* Ensure the canvas has proper dimensions */
         canvas {
-            width: 100% !important;
-            height: 400px !important; /* Set explicit height */
+            width: 75% !important;
+            height: auto !important;
         }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.2/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
@@ -77,12 +99,22 @@
     </div>
 </div>
 
+<!-- Pagination and Save to Excel Button in a container -->
+<div class="button-container">
+    <button id="prevPage">Previous</button>
+    <span id="pageInfo"></span>
+    <button id="nextPage">Next</button>
+    <button id="saveToExcel">Save to Excel</button>
+</div>
+
+<!-- Button to save the table to Excel -->
+<button id="saveToExcel">Save to Excel</button>
+
 <script>
     let data = [];
     const rowsPerPage = 100; // Set the number of rows per page
     let currentPage = 1;
 
-    // Fetch data and render the table and charts
     fetch('final.json')
         .then(response => response.json())
         .then(jsonData => {
@@ -94,7 +126,6 @@
         })
         .catch(error => console.error('Error loading the JSON data:', error));
 
-    // Function to render the table
     function renderTable(page) {
         const table = document.getElementById('jsonTable').getElementsByTagName('tbody')[0];
         table.innerHTML = ''; // Clear the table
@@ -105,6 +136,7 @@
         const pageData = data.slice(start, end); // Get the data for the current page
         pageData.forEach(item => {
             const row = table.insertRow();
+
             row.insertCell(0).textContent = item.model || '';
             row.insertCell(1).textContent = item.vin || '';
             row.insertCell(2).textContent = item['fota-path'] || '';
@@ -121,12 +153,58 @@
         });
     }
 
-    // Function to update page info
     function updatePageInfo() {
         const pageInfo = document.getElementById('pageInfo');
         const totalPages = Math.ceil(data.length / rowsPerPage);
         pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
     }
+
+    document.getElementById('nextPage').addEventListener('click', () => {
+        if (currentPage * rowsPerPage < data.length) {
+            currentPage++;
+            renderTable(currentPage);
+            updatePageInfo();
+        }
+    });
+
+    document.getElementById('prevPage').addEventListener('click', () => {
+        if (currentPage > 1) {
+            currentPage--;
+            renderTable(currentPage);
+            updatePageInfo();
+        }
+    });
+
+    // Function to save the entire data to an Excel file
+    document.getElementById('saveToExcel').addEventListener('click', () => {
+        const ws_data = [];
+        const headers = Array.from(document.getElementById('jsonTable').getElementsByTagName('th')).map(th => th.textContent);
+        ws_data.push(headers); // Add headers
+
+        data.forEach(item => {
+            const rowData = [
+                item.model || '',
+                item.vin || '',
+                item['fota-path'] || '',
+                item['fota-version'] || '',
+                item.tla || '',
+                item.controller || '',
+                item['chunk-size'] || '',
+                item['total-chunks'] || '',
+                item.offset || '',
+                item.downloaded || '',
+                item.percentage || '',
+                item['download-completed'] || '',
+                item['installation & verification'] || ''
+            ];
+            ws_data.push(rowData);
+        });
+
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.aoa_to_sheet(ws_data);
+        XLSX.utils.book_append_sheet(wb, ws, 'FOTA Report');
+        XLSX.writeFile(wb, 'FOTA_Download_Report.xlsx');
+    });
 
     // Function to draw "Download Completed" pie chart
     function drawDownloadCompletedChart() {
@@ -160,7 +238,7 @@
         });
     }
 
-    // Function to draw "Percentage Distribution" pie chart
+    // Function to draw "Percentage Distribution" pie chart with actual percentage of each group
     function drawPercentageDistributionChart() {
         const percentageCounts = {};
 
